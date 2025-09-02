@@ -11,6 +11,6 @@ export async function signup(payload: {
     email: string;
     password: string;
 }) {
-    const res = await api.post("/auth/signup", payload);
+    const res = await api.post("/user", payload);
     return res.data;
 }
