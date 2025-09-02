@@ -10,12 +10,39 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {GalleryVerticalEnd} from "lucide-react";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useState} from "react";
+import {login} from "@/service/auth.ts";
+import {useAuthStore} from "@/store/auth.ts";
+import * as React from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
+    const setToken = useAuthStore((state) => state.setToken)
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        try {
+            setLoading(true)
+            const data = await login(username, password)
+            setToken(data.token) // save to global store
+            navigate("/home") // redirect
+            console.log("✅ Logged in:", data)
+            // save token or update global state here
+        } catch (err: any) {
+            console.error("Login failed:", err.response?.data || err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
   return (
       <div className="flex min-h-vh flex-col items-center justify-center">
           <div className="flex w-full max-w-sm flex-col gap-6">
@@ -34,7 +61,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <div className="flex flex-col gap-4">
                 <Button variant="outline" className="w-full">
@@ -66,8 +93,10 @@ export function LoginForm({
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
-                    type="email"
+                    type="text"
                     placeholder="m@example.com"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
@@ -81,10 +110,16 @@ export function LoginForm({
                       Forgot your password?
                     </a>
                   </div>
-                  <Input id="password" type="password" required />
+                  <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                  />
                 </div>
                 <Button type="submit" className="w-full">
-                  Login
+                    {loading ? "Logging in..." : "Login"}
                 </Button>
               </div>
               <div className="text-center text-sm">
