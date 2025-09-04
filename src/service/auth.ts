@@ -1,7 +1,8 @@
-import api from "@/lib/axios";
+import {api} from "@/lib/axios.ts";
 
 export async function login(username: string, password: string) {
     const response = await api.post("/auth/login", { username, password });
+    api.defaults.headers.common["Authorization"] = response.data.token;
     return response.data;
 }
 
