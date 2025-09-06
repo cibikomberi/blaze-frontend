@@ -1,15 +1,31 @@
 import * as React from "react"
-import {Command, FilesIcon, Home, User2Icon,} from "lucide-react"
-import {NavUser} from "@/components/nav-user"
-import {OrganizationSwitcher} from "@/components/organization-switcher.tsx"
-import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/components/ui/sidebar"
-import {NavMain} from "@/components/nav-main.tsx";
-import {useAppStore} from "@/store/useAppStore.ts";
-
+import { Command, FilesIcon, Home, User2Icon } from "lucide-react"
+import { NavUser } from "@/components/nav-user"
+import { OrganizationSwitcher } from "@/components/organization-switcher"
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarRail,
+} from "@/components/ui/sidebar"
+import { NavMain } from "@/components/nav-main"
+import { useAppStore } from "@/store/useAppStore"
+import { useParams } from "react-router-dom"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const user = useAppStore((s) => s.user);
-    const buckets = useAppStore((s) => s.buckets);
+    const { organizationId } = useParams<{ organizationId: string }>()
+    const user = useAppStore((s) => s.user)
+    const buckets = useAppStore((s) => s.buckets)
+
+    // If org isn't known yet, you can render nothing or a skeleton.
+    // Your initial-data hook will redirect to a valid org.
+    if (!organizationId) {
+        return null
+    }
+
+    const base = `/app/${organizationId}`
+
     const data = {
         user: {
             name: user?.name,
@@ -19,43 +35,42 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         options: [
             {
                 title: "Home",
-                url: "/home",
+                url: `${base}/home`,
                 icon: Home,
             },
             {
                 title: "Users",
-                url: "/app/home",
+                url: `${base}/user`,
                 icon: User2Icon,
                 items: [
                     {
                         title: "Manage users",
-                        url: "/app/user"
+                        url: `${base}/user`,
                     },
                     {
                         title: "Add user",
-                        url: "/app/user/add"
-                    }
-                ]
+                        url: `${base}/user/add`,
+                    },
+                ],
             },
             {
                 title: "Browse",
-                url: "/files",
+                url: `${base}/bucket`,
                 icon: FilesIcon,
                 items: [
                     {
                         title: "All buckets",
-                        url: "/app/bucket",
+                        url: `${base}/bucket`,
                     },
-                ...buckets.map((bucket) => ({
-                    title: bucket.name,
-                    url: `/app/bucket/${bucket.id}`,
-                }))]
+                    ...buckets.map((bucket) => ({
+                        title: bucket.name,
+                        url: `${base}/bucket/${bucket.id}`,
+                    })),
+                ],
             },
-
         ],
-
     }
-    console.log(data)
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -63,7 +78,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.options} />
-                {/*<NavProjects options={data.options} />*/}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />

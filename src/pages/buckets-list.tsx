@@ -1,40 +1,38 @@
 import { useEffect, useState } from "react"
 import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious,
+    Pagination, PaginationContent, PaginationItem,
+    PaginationNext, PaginationPrevious,
 } from "@/components/ui/pagination"
 import { api } from "@/lib/axios.ts"
 import { useAppStore } from "@/store/useAppStore.ts"
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom"
+import { Plus } from "lucide-react" // <- for the + button
+
+// simple debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState(value)
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay)
+        return () => clearTimeout(handler)
+    }, [value, delay])
+    return debouncedValue
+}
 
 type Bucket = {
     id: string
     name: string
     region: string
-    createdAt: string
+    created_at: string
     objects: number
     size: string
 }
@@ -60,22 +58,27 @@ export default function BucketsPage() {
     const [cursorStack, setCursorStack] = useState<(string | null)[]>([null])
     const [pageIndex, setPageIndex] = useState(0)
 
+    // search
+    const [searchInput, setSearchInput] = useState("")
+    const keyword = useDebounce(searchInput, 300)
+
     const fetchBuckets = async (cursorValue?: string | null, reset = false) => {
         if (!activeOrganization) return
         setLoading(true)
         try {
-            const limit = 5;
+            const limit = 5
             const res = await api.get<BucketsResponse>("/bucket", {
                 params: {
                     cursor: cursorValue ?? undefined,
                     limit,
                     organization_id: activeOrganization.id,
+                    keyword: keyword || undefined,
                 },
             })
 
             if (res.data.length > 0) {
                 setBuckets(res.data)
-                if (res.data.length == limit) {
+                if (res.data.length === limit) {
                     setNextCursor(res.data[limit - 1].id)
                 } else {
                     setNextCursor(null)
@@ -97,7 +100,7 @@ export default function BucketsPage() {
 
     useEffect(() => {
         fetchBuckets(null, true)
-    }, [activeOrganization])
+    }, [activeOrganization, keyword])
 
     // handle next
     const handleNext = () => {
@@ -139,12 +142,21 @@ export default function BucketsPage() {
     return (
         <div className="container mx-auto py-10">
             <Card>
-                <CardHeader className="flex items-center justify-between">
-                    <CardTitle>Buckets</CardTitle>
+                <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    {/* Search Box */}
+                    <Input
+                        placeholder="Search buckets..."
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        className="w-64"
+                    />
 
+                    {/* + Button for Create */}
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button>Create Bucket</Button>
+                            <Button size="icon">
+                                <Plus className="h-5 w-5" />
+                            </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -175,9 +187,6 @@ export default function BucketsPage() {
 
                 <CardContent>
                     <Table>
-                        <TableCaption>
-                            A list of all your buckets. {loading && "Loading..."}
-                        </TableCaption>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
@@ -213,6 +222,13 @@ export default function BucketsPage() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {buckets.length === 0 && !loading && (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                                        No buckets found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
 

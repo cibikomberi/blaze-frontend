@@ -22,7 +22,7 @@ export function useTokenRefresher() {
                 setToken(newToken)
             } catch (err) {
                 console.error("Failed to refresh token", err)
-                navigate("/login")
+                // navigate("/login")
             }
         }
 

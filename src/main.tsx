@@ -7,7 +7,7 @@ import {BrowserRouter} from "react-router-dom";
 createRoot(document.getElementById('root')!).render(
   <>
       <BrowserRouter>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
               <App />
           </ThemeProvider>
       </BrowserRouter>
