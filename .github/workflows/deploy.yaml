@@ -29,4 +29,4 @@ jobs:
 
       - name: Deploy to server
         run: |
-          rsync -avz --delete ./dist/ ${{ secrets.SERVER_PATH }}
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./dist/ ${{ secrets.SERVER_PATH }}
