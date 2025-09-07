@@ -7,8 +7,8 @@ import {
   useMotionValue,
   useSpring,
 } from 'motion/react';
+import {cn} from "@/lib/utils.ts";
 
-import { cn } from '@repo/shadcn-ui/lib/utils';
 
 type BubbleBackgroundProps = React.ComponentProps<'div'> & {
   interactive?: boolean;
