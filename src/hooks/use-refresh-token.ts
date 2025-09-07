@@ -1,14 +1,12 @@
 "use client"
 
 import {useEffect} from "react"
-import {useNavigate} from "react-router-dom";
 import {useAuthStore} from "@/store/auth.ts";
 import {api} from "@/lib/axios.ts";
 
 export function useTokenRefresher() {
     const setToken = useAuthStore((state) => state.setToken)
     const clearAuth = useAuthStore((state) => state.clearToken)
-    const navigate = useNavigate()
 
     useEffect(() => {
         let interval: NodeJS.Timeout
@@ -22,7 +20,7 @@ export function useTokenRefresher() {
                 setToken(newToken)
             } catch (err) {
                 console.error("Failed to refresh token", err)
-                navigate("/login")
+                // navigate("/login")
             }
         }
 

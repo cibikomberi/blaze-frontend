@@ -33,7 +33,7 @@ export function LoginForm({
             setLoading(true)
             const data = await login(username, password)
             setToken(data.token) // save to global store
-            navigate("/home") // redirect
+            navigate("/app") // redirect
             console.log("✅ Logged in:", data)
             // save token or update global state here
         } catch (err: any) {

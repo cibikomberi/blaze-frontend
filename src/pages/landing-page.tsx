@@ -1,72 +1,83 @@
-"use client"
-
 import { Button } from "@/components/ui/button"
-import {BubbleBackground} from "@/components/ui/shadcn-io/bubble-background";
+import {BackgroundBeams} from "@/components/ui/shadcn-io/background-beams";
+import {useEffect} from "react";
+import {Link} from "react-router-dom";
 
 export default function LandingPage() {
+    useEffect(() => {
+        const root = document.getElementById("root");
+        console.log(root);
+        if (root) {
+            root.id = ""
+        }
+
+        return () => {
+            if (root) {
+                root.id = "root"
+            }
+        };
+    }, []);
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="h-screen w-full snap-y snap-mandatory overflow-y-scroll">
             {/* Hero Section */}
-            <section className="relative h-screen w-full overflow-hidden">
-                {/* Bubble background */}
-                <BubbleBackground interactive className="absolute inset-0" />
+            <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden text-center px-6 snap-start">
+                <BackgroundBeams />
+                <div className="relative z-10">
+          <span className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-black to-gray-300/80 bg-clip-text text-8xl font-semibold leading-none text-transparent dark:from-white dark:to-slate-900/10">
+            Blaze
+          </span>
+                    <div className="pointer-events-none whitespace-pre-wrap bg-gradient-to-b from-gray-700 to-gray-400/80 bg-clip-text font-extralight text-base md:text-4xl text-transparent dark:from-neutral-100 dark:to-slate-500/30 py-4">
+                        Blazing-fast bucket storage, built for developers and teams.
+                    </div>
+                    <div className="mt-8 flex justify-center gap-4">
+                        <Link to="/login">
 
-                {/* Navbar */}
-                <header className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4">
-                    <div className="text-xl font-bold text-white drop-shadow">MyBrand</div>
-                    <Button variant="outline" className="bg-white/20 text-white hover:bg-white/30 border-white/40">
-                        Login
-                    </Button>
-                </header>
-
-                {/* Centered Call to Action */}
-                <div className="relative z-10 flex h-full flex-col items-center justify-center text-center px-4">
-                    <h1 className="text-5xl sm:text-6xl font-bold text-white drop-shadow-lg">
-                        Welcome to My App
-                    </h1>
-                    <p className="mt-4 max-w-xl text-lg text-white/80 drop-shadow">
-                        A sleek and minimalist way to manage your apps, data, and workflow.
-                    </p>
-                    <Button size="lg" className="mt-8">
-                        Get Started
-                    </Button>
+                        <Button variant="secondary" size="lg">
+                            Get Started
+                        </Button>
+                        </Link>
+                    </div>
                 </div>
             </section>
 
-            {/* About Section */}
-            <section
-                id="about"
-                className="container mx-auto flex flex-col items-center justify-center py-20 text-center gap-8"
-            >
-                {/*<Image*/}
-                {/*    src="/me.jpg"  // replace with your actual image path*/}
-                {/*    alt="Your Name"*/}
-                {/*    width={160}*/}
-                {/*    height={160}*/}
-                {/*    className="rounded-full border shadow-md"*/}
-                {/*/>*/}
-                <div>
-                    <h2 className="text-3xl font-bold mb-2">Your Name</h2>
-                    <p className="text-muted-foreground max-w-2xl">
-                        I am a passionate developer experienced in building scalable apps,
-                        cloud integrations, and clean frontend experiences. I enjoy crafting
-                        seamless UIs with solid backend architecture.
-                    </p>
+            {/* About the Product */}
+            <section className="h-screen flex flex-col items-center justify-center text-center px-6 bg-background snap-start">
+                <h2 className="text-4xl font-bold text-foreground">About Blaze</h2>
+                <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+                    Blaze is a simple and reliable storage solution. You can create buckets
+                    to organize your files, store documents, images, or other assets, and
+                    access them whenever you need. Built with developers in mind, Blaze
+                    helps you manage data without complexity.
+                </p>
+            </section>
+
+            {/* About Me */}
+            <section className="h-screen flex items-center justify-center px-6 bg-muted snap-start">
+                <div className="flex flex-col md:flex-row items-center gap-10 max-w-5xl">
+                    {/* Image left */}
+                    <img
+                        src="/public/me.png" // put your image inside public/me.jpg
+                        alt="My profile"
+                        className="w-40 h-40 md:w-86 md:h-86 rounded-full border-primary shadow-lg object-cover"
+                    />
+                    {/* Content right */}
+                    <div className="text-center md:text-left max-w-xl">
+                        <h2 className="text-4xl font-bold text-foreground">About Me</h2>
+                        <p className="mt-6 text-lg text-muted-foreground">
+                            Hi, I’m <span className="font-bold">cibi</span>.
+                            I enjoy building developer tools, cloud solutions, and IoT
+                            applications. Blaze is a project I created to make file storage
+                            faster and more accessible. I love solving problems and creating
+                            experiences that help others.
+                        </p>
+                    </div>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="border-t">
-                <div
-                    className="container flex h-16 items-center justify-between text-sm text-muted-foreground"
-                >
-                    <p>© {new Date().getFullYear()} MyBrand. All rights reserved.</p>
-                    <div className="flex gap-4">
-                        <a href="#">Privacy</a>
-                        <a href="#">Terms</a>
-                    </div>
-                </div>
-            </footer>
+            {/*<footer className="h-screen flex items-center justify-center border-t text-center text-sm text-muted-foreground snap-start">*/}
+            {/*    © {new Date().getFullYear()} Blaze. All rights reserved.*/}
+            {/*</footer>*/}
         </div>
     )
 }
