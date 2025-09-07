@@ -1,27 +1,13 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import { FileIcon, FolderIcon, PlusIcon, UploadIcon, Trash2Icon } from "lucide-react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { api } from "@/lib/axios.ts"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
+import {useEffect, useRef, useState} from "react"
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table"
+import {FileIcon, FolderIcon, PlusIcon, Trash2Icon, UploadIcon} from "lucide-react"
+import {Link, useParams} from "react-router-dom"
+import {api} from "@/lib/axios.ts"
+import {Input} from "@/components/ui/input"
+import {Button} from "@/components/ui/button"
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
 import {toast} from "sonner";
 
 interface Item {
@@ -50,7 +36,6 @@ interface FolderResponse {
 
 export function BucketTable() {
     const params = useParams<{ bucketId: string; organizationId: string; folderId?: string }>()
-    const navigate = useNavigate()
 
     const [items, setItems] = useState<Item[]>([])
     const [loading, setLoading] = useState(true)
@@ -113,7 +98,7 @@ export function BucketTable() {
     }
 
     useEffect(() => {
-        fetchFolders(null, true)
+        fetchFolders(undefined, true)
     }, [params.bucketId, params.organizationId, params.folderId, search])
 
 
@@ -127,8 +112,8 @@ export function BucketTable() {
             })
             setNewFolderName("")
             setNewFolderOpen(false)
-            await fetchFolders(null, true)
-        } catch (err) {
+            await fetchFolders(undefined, true)
+        } catch {
             toast("Failed to create folder")
         }
     }
@@ -137,8 +122,8 @@ export function BucketTable() {
         try {
             const endpoint = item.kind === "folder" ? `/folder/${item.id}` : `/file/${item.id}`
             await api.delete(endpoint)
-            await fetchFolders(null, true) // refresh after delete
-        } catch (err) {
+            await fetchFolders(undefined, true) // refresh after delete
+        } catch {
             toast("Failed to delete")
         }
     }
@@ -153,8 +138,8 @@ export function BucketTable() {
                     "Content-Type": file.type || "application/octet-stream",
                 },
             })
-            fetchFolders(null, true)
-        } catch (err) {
+            await fetchFolders(undefined, true)
+        } catch {
             toast("Failed to upload file")
         }
     }
@@ -173,7 +158,7 @@ export function BucketTable() {
             document.body.appendChild(link)
             link.click()
             link.remove()
-        } catch (err) {
+        } catch {
             toast("Failed to download file")
         }
     }

@@ -37,11 +37,6 @@ type Bucket = {
     size: string
 }
 
-type BucketsResponse = {
-    data: Bucket[]
-    nextCursor?: string | null
-}
-
 export default function BucketsPage() {
     const activeOrganization = useAppStore((store) => store.activeOrganization)
 
@@ -67,7 +62,7 @@ export default function BucketsPage() {
         setLoading(true)
         try {
             const limit = 5
-            const res = await api.get<BucketsResponse>("/bucket", {
+            const res = await api.get<Bucket[]>("/bucket", {
                 params: {
                     cursor: cursorValue ?? undefined,
                     limit,

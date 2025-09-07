@@ -1,17 +1,11 @@
 import * as React from "react"
-import { Command, FilesIcon, Home, User2Icon } from "lucide-react"
-import { NavUser } from "@/components/nav-user"
-import { OrganizationSwitcher } from "@/components/organization-switcher"
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarRail,
-} from "@/components/ui/sidebar"
-import { NavMain } from "@/components/nav-main"
-import { useAppStore } from "@/store/useAppStore"
-import { useParams } from "react-router-dom"
+import {FilesIcon, Home, User2Icon} from "lucide-react"
+import {NavUser} from "@/components/nav-user"
+import {OrganizationSwitcher} from "@/components/organization-switcher"
+import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/components/ui/sidebar"
+import {NavMain} from "@/components/nav-main"
+import {useAppStore} from "@/store/useAppStore"
+import {useParams} from "react-router-dom"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { organizationId } = useParams<{ organizationId: string }>()
@@ -20,7 +14,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     // If org isn't known yet, you can render nothing or a skeleton.
     // Your initial-data hook will redirect to a valid org.
-    if (!organizationId) {
+    if (!organizationId || !user) {
         return null
     }
 
@@ -28,8 +22,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     const data = {
         user: {
-            name: user?.name,
-            email: user?.email,
+            name: user.name,
+            email: user.email,
             avatar: "/avatars/shadcn.jpg",
         },
         options: [
