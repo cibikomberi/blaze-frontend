@@ -1,14 +1,29 @@
 "use client"
 
 import {useEffect, useRef, useState} from "react"
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table"
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 import {FileIcon, FolderIcon, PlusIcon, Trash2Icon, UploadIcon} from "lucide-react"
 import {Link, useParams} from "react-router-dom"
 import {api} from "@/lib/axios.ts"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
-import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,} from "@/components/ui/dialog"
-import {toast} from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {Progress} from "@/components/ui/progress"
+import {toast} from "sonner"
 
 interface Item {
     id: string
@@ -50,6 +65,9 @@ export function BucketTable() {
     const [currentFolder, setCurrentFolder] = useState<FolderResponse["folder"] | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    // upload progress state
+    const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+
     const fetchFolders = async (
         cursorValue?: { id: string | null; kind: string | null },
         reset = false
@@ -57,7 +75,7 @@ export function BucketTable() {
         if (!params.bucketId) return
         setLoading(true)
         try {
-            const limit = 5
+            const limit = 10
             const res = await api.get<FolderResponse>("/folder", {
                 params: {
                     cursor: cursorValue?.id ?? undefined,
@@ -65,7 +83,7 @@ export function BucketTable() {
                     limit,
                     organization_id: params.organizationId,
                     bucket_id: params.bucketId,
-                    folder_id: params.folderId, // ✅ send folder_id if present
+                    folder_id: params.folderId,
                     keyword: search || undefined,
                 },
             })
@@ -101,7 +119,6 @@ export function BucketTable() {
         fetchFolders(undefined, true)
     }, [params.bucketId, params.organizationId, params.folderId, search])
 
-
     const handleCreateFolder = async () => {
         if (!params.bucketId || !currentFolder) return
         try {
@@ -122,7 +139,7 @@ export function BucketTable() {
         try {
             const endpoint = item.kind === "folder" ? `/folder/${item.id}` : `/file/${item.id}`
             await api.delete(endpoint)
-            await fetchFolders(undefined, true) // refresh after delete
+            await fetchFolders(undefined, true)
         } catch {
             toast("Failed to delete")
         }
@@ -130,31 +147,48 @@ export function BucketTable() {
 
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !currentFolder) return
-        const file = e.target.files[0]
+
+        const files = Array.from(e.target.files)
+
         try {
-            await api.put(`/file/${currentFolder.id}`, file, {
-                params: { file_name: file.name },
-                headers: {
-                    "Content-Type": file.type || "application/octet-stream",
-                },
-            })
+            for (const file of files) {
+                setUploadProgress((prev) => ({ ...prev, [file.name]: 0 }))
+
+                await api.put(`/file/${currentFolder.id}`, file, {
+                    params: { file_name: file.name },
+                    headers: {
+                        "Content-Type": file.type || "application/octet-stream",
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        const percent = Math.round(
+                            (progressEvent.loaded * 100) / (progressEvent.total ?? 1)
+                        )
+                        setUploadProgress((prev) => ({ ...prev, [file.name]: percent }))
+                    },
+                })
+
+                setUploadProgress((prev) => ({ ...prev, [file.name]: 100 }))
+            }
+
+            toast.success(`${files.length} file(s) uploaded`)
             await fetchFolders(undefined, true)
         } catch {
-            toast("Failed to upload file")
+            toast.error("Failed to upload file(s)")
+        } finally {
+            e.target.value = "" // reset input so same file(s) can be uploaded again
         }
     }
 
     const handleDownload = async (file: Item) => {
         try {
             const res = await api.get(`/file/${file.id}`, {
-                responseType: "blob", // important for binary data
+                responseType: "blob",
             })
 
-            // Create a download link
             const url = window.URL.createObjectURL(new Blob([res.data]))
             const link = document.createElement("a")
             link.href = url
-            link.setAttribute("download", file.name) // file name preserved
+            link.setAttribute("download", file.name)
             document.body.appendChild(link)
             link.click()
             link.remove()
@@ -163,13 +197,26 @@ export function BucketTable() {
         }
     }
 
-
     return (
         <div className="rounded border shadow-sm">
             {/* Folder name */}
             <div className="px-4 py-2 border-b bg-muted/40 font-semibold">
                 {currentFolder ? currentFolder.name : "Root"}
             </div>
+
+            {/* Upload Progress */}
+            {Object.keys(uploadProgress).length > 0 && (
+                <div className="px-4 py-2 space-y-2 border-b bg-muted/30">
+                    {Object.entries(uploadProgress).map(([fileName, percent]) => (
+                        <div key={fileName}>
+                            <div className="text-sm mb-1">
+                                {fileName} — {percent}%
+                            </div>
+                            <Progress value={percent} className="h-2" />
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b gap-2">
@@ -219,6 +266,7 @@ export function BucketTable() {
                         type="file"
                         ref={fileInputRef}
                         className="hidden"
+                        multiple   // ✅ allow multiple file selection
                         onChange={handleUpload}
                     />
                 </div>

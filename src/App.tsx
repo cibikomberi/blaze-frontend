@@ -9,6 +9,7 @@ import LandingPage from "@/pages/landing-page.tsx";
 import {BucketTable} from "@/pages/bucket-view.tsx";
 import NotFoundPage from "@/pages/404.tsx";
 import {AuthGate} from "@/components/auth-gate.tsx";
+import {OrganizationUsersPage} from "@/pages/organization-users.tsx";
 
 export function App() {
     // useTokenRefresher()
@@ -24,14 +25,15 @@ export function App() {
                 <Route path="app" element={<MainLayout />}>
                     <Route path=":organizationId">
                     <Route path="home" element={<div />} />
-                        <Route path="bucket">
-                            <Route index element={<BucketsPage />} />
-                            <Route path=":bucketId" >
-                                <Route index element={<BucketTable />} />
-                                <Route path=":folderId" element={<BucketTable />} />
-                            </Route>
+                    <Route path="user" element={<OrganizationUsersPage />} />
+                    <Route path="bucket">
+                        <Route index element={<BucketsPage />} />
+                        <Route path=":bucketId" >
+                            <Route index element={<BucketTable />} />
+                            <Route path=":folderId" element={<BucketTable />} />
                         </Route>
                     </Route>
+                </Route>
                 </Route>
             </Route>
 
