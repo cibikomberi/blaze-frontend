@@ -15,6 +15,7 @@ import {useState} from "react";
 import {login} from "@/service/auth.ts";
 import {useAuthStore} from "@/store/auth.ts";
 import * as React from "react";
+import {toast} from "sonner";
 
 export function LoginForm({
   className,
@@ -37,7 +38,7 @@ export function LoginForm({
             console.log("✅ Logged in:", data)
             // save token or update global state here
         } catch (err: any) {
-            console.error("Login failed:", err.response?.data || err.message)
+            toast.error("Login failed:", err.response?.data || err.message)
         } finally {
             setLoading(false)
         }

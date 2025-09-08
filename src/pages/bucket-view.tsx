@@ -2,28 +2,21 @@
 
 import {useEffect, useRef, useState} from "react"
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+    Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import {FileIcon, FolderIcon, PlusIcon, Trash2Icon, UploadIcon} from "lucide-react"
+import {
+    FileIcon, FolderIcon, PlusIcon, Trash2Icon, UploadIcon,
+} from "lucide-react"
 import {Link, useParams} from "react-router-dom"
 import {api} from "@/lib/axios.ts"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+    Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog"
 import {Progress} from "@/components/ui/progress"
 import {toast} from "sonner"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface Item {
     id: string
@@ -65,8 +58,10 @@ export function BucketTable() {
     const [currentFolder, setCurrentFolder] = useState<FolderResponse["folder"] | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // upload progress state
-    const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
+    // Upload progress state
+    const [uploadProgress, setUploadProgress] = useState<
+        { fileName: string; percent: number; done: boolean }[]
+    >([])
 
     const fetchFolders = async (
         cursorValue?: { id: string | null; kind: string | null },
@@ -152,7 +147,7 @@ export function BucketTable() {
 
         try {
             for (const file of files) {
-                setUploadProgress((prev) => ({ ...prev, [file.name]: 0 }))
+                setUploadProgress((prev) => [...prev, { fileName: file.name, percent: 0, done: false }])
 
                 await api.put(`/file/${currentFolder.id}`, file, {
                     params: { file_name: file.name },
@@ -163,11 +158,24 @@ export function BucketTable() {
                         const percent = Math.round(
                             (progressEvent.loaded * 100) / (progressEvent.total ?? 1)
                         )
-                        setUploadProgress((prev) => ({ ...prev, [file.name]: percent }))
+                        setUploadProgress((prev) =>
+                            prev.map((p) =>
+                                p.fileName === file.name ? { ...p, percent } : p
+                            )
+                        )
                     },
                 })
 
-                setUploadProgress((prev) => ({ ...prev, [file.name]: 100 }))
+                setUploadProgress((prev) =>
+                    prev.map((p) =>
+                        p.fileName === file.name ? { ...p, percent: 100, done: true } : p
+                    )
+                )
+                setTimeout(() => {
+                    setUploadProgress((prev) =>
+                        prev.filter((p) => p.fileName !== file.name)
+                    )
+                }, 5000)
             }
 
             toast.success(`${files.length} file(s) uploaded`)
@@ -175,7 +183,7 @@ export function BucketTable() {
         } catch {
             toast.error("Failed to upload file(s)")
         } finally {
-            e.target.value = "" // reset input so same file(s) can be uploaded again
+            e.target.value = "" // reset input
         }
     }
 
@@ -198,25 +206,11 @@ export function BucketTable() {
     }
 
     return (
-        <div className="rounded border shadow-sm">
+        <div className="rounded border shadow-sm relative">
             {/* Folder name */}
             <div className="px-4 py-2 border-b bg-muted/40 font-semibold">
                 {currentFolder ? currentFolder.name : "Root"}
             </div>
-
-            {/* Upload Progress */}
-            {Object.keys(uploadProgress).length > 0 && (
-                <div className="px-4 py-2 space-y-2 border-b bg-muted/30">
-                    {Object.entries(uploadProgress).map(([fileName, percent]) => (
-                        <div key={fileName}>
-                            <div className="text-sm mb-1">
-                                {fileName} — {percent}%
-                            </div>
-                            <Progress value={percent} className="h-2" />
-                        </div>
-                    ))}
-                </div>
-            )}
 
             {/* Top bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b gap-2">
@@ -266,7 +260,7 @@ export function BucketTable() {
                         type="file"
                         ref={fileInputRef}
                         className="hidden"
-                        multiple   // ✅ allow multiple file selection
+                        multiple
                         onChange={handleUpload}
                     />
                 </div>
@@ -384,6 +378,25 @@ export function BucketTable() {
                     Next →
                 </button>
             </div>
+
+            {/* Floating Upload Progress Panel */}
+            {uploadProgress.length > 0 && (
+                <div className="fixed bottom-4 right-4 w-80 max-h-60 bg-background border rounded-lg shadow-lg p-3 z-50">
+                    <div className="font-medium text-sm mb-2">Uploading files</div>
+                    <ScrollArea className="h-40 pr-2">
+                        <div className="space-y-3">
+                            {uploadProgress.map((file) => (
+                                <div key={file.fileName}>
+                                    <div className="text-xs mb-1 truncate">
+                                        {file.fileName} — {file.percent}%
+                                    </div>
+                                    <Progress value={file.percent} className="h-2" />
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                </div>
+            )}
         </div>
     )
 }

@@ -33,7 +33,7 @@ export default function CreateOrganizationPage() {
             setOrganizations([...organizations, org]);
             setActiveOrganization(org);
             toast.success("Organization created successfully")
-            navigate("/home")
+            navigate("/app")
         } catch (err: any) {
             toast.error(err.message || "Failed to create organization")
         } finally {

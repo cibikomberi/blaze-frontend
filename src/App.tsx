@@ -10,6 +10,7 @@ import {BucketTable} from "@/pages/bucket-view.tsx";
 import NotFoundPage from "@/pages/404.tsx";
 import {AuthGate} from "@/components/auth-gate.tsx";
 import {OrganizationUsersPage} from "@/pages/organization-users.tsx";
+import UserProfilePage from "@/pages/user.tsx";
 
 export function App() {
     // useTokenRefresher()
@@ -23,6 +24,9 @@ export function App() {
             <Route path="organization/new" element={<CreateOrganizationPage />} />
             <Route path="" element={<AuthGate />} >
                 <Route path="app" element={<MainLayout />}>
+                    <Route path="user">
+                        <Route path=":userId" element={<UserProfilePage />} />
+                    </Route>
                     <Route path=":organizationId">
                     <Route path="home" element={<div />} />
                     <Route path="user" element={<OrganizationUsersPage />} />
