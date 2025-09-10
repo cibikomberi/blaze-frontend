@@ -1,4 +1,7 @@
+"use client"
+
 import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -13,10 +16,13 @@ import {
     Pagination, PaginationContent, PaginationItem,
     PaginationNext, PaginationPrevious,
 } from "@/components/ui/pagination"
+import {
+    Select, SelectContent, SelectItem,
+    SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { Plus } from "lucide-react"
 import { api } from "@/lib/axios.ts"
 import { useAppStore } from "@/store/useAppStore.ts"
-import { Link } from "react-router-dom"
-import { Plus } from "lucide-react" // <- for the + button
 
 // simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -31,10 +37,8 @@ function useDebounce<T>(value: T, delay: number): T {
 type Bucket = {
     id: string
     name: string
-    region: string
     created_at: string
-    objects: number
-    size: string
+    visibility: "PRIVATE" | "PUBLIC"
 }
 
 export default function BucketsPage() {
@@ -134,6 +138,22 @@ export default function BucketsPage() {
         }
     }
 
+    const handleVisibilityChange = async (bucketId: string, visibility: "PRIVATE" | "PUBLIC") => {
+        try {
+            await api.put(`/bucket`, {
+                bucket_id: bucketId,
+                visibility
+            })
+            setBuckets((prev) =>
+                prev.map((b) =>
+                    b.id === bucketId ? { ...b, visibility } : b
+                )
+            )
+        } catch (err) {
+            console.error("Failed to update visibility:", err)
+        }
+    }
+
     return (
         <div className="container mx-auto py-10">
             <Card>
@@ -185,10 +205,8 @@ export default function BucketsPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
-                                <TableHead>Region</TableHead>
-                                <TableHead>Objects</TableHead>
-                                <TableHead>Size</TableHead>
                                 <TableHead>Created At</TableHead>
+                                <TableHead>Visibility</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -196,9 +214,6 @@ export default function BucketsPage() {
                             {buckets.map((bucket) => (
                                 <TableRow key={bucket.id}>
                                     <TableCell className="font-medium">{bucket.name}</TableCell>
-                                    <TableCell>{bucket.region}</TableCell>
-                                    <TableCell>{bucket.objects}</TableCell>
-                                    <TableCell>{bucket.size}</TableCell>
                                     <TableCell>
                                         {bucket.created_at
                                             ? new Date(bucket.created_at).toLocaleDateString("en-US", {
@@ -207,6 +222,22 @@ export default function BucketsPage() {
                                                 day: "numeric",
                                             })
                                             : ""}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Select
+                                            value={bucket.visibility}
+                                            onValueChange={(val) =>
+                                                handleVisibilityChange(bucket.id, val as "PRIVATE" | "PUBLIC")
+                                            }
+                                        >
+                                            <SelectTrigger className="w-[140px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="PRIVATE">PRIVATE</SelectItem>
+                                                <SelectItem value="PUBLIC">PUBLIC</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <Link to={bucket.id}>
@@ -219,7 +250,7 @@ export default function BucketsPage() {
                             ))}
                             {buckets.length === 0 && !loading && (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                                    <TableCell colSpan={4} className="text-center py-6 text-muted-foreground">
                                         No buckets found.
                                     </TableCell>
                                 </TableRow>
@@ -233,17 +264,13 @@ export default function BucketsPage() {
                                 <PaginationItem>
                                     <PaginationPrevious
                                         onClick={handlePrev}
-                                        className={
-                                            pageIndex === 0 ? "pointer-events-none opacity-50" : ""
-                                        }
+                                        className={pageIndex === 0 ? "pointer-events-none opacity-50" : ""}
                                     />
                                 </PaginationItem>
                                 <PaginationItem>
                                     <PaginationNext
                                         onClick={handleNext}
-                                        className={
-                                            !nextCursor ? "pointer-events-none opacity-50" : ""
-                                        }
+                                        className={!nextCursor ? "pointer-events-none opacity-50" : ""}
                                     />
                                 </PaginationItem>
                             </PaginationContent>

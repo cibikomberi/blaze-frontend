@@ -1,5 +1,5 @@
 import * as React from "react"
-import {FilesIcon, Home, User2Icon} from "lucide-react"
+import {FilesIcon, Home, KeyRoundIcon, User2Icon} from "lucide-react"
 import {NavUser} from "@/components/nav-user"
 import {OrganizationSwitcher} from "@/components/organization-switcher"
 import {Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,} from "@/components/ui/sidebar"
@@ -37,16 +37,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 title: "Users",
                 url: `${base}/user`,
                 icon: User2Icon,
-                items: [
-                    {
-                        title: "Manage users",
-                        url: `${base}/user`,
-                    },
-                    {
-                        title: "Add user",
-                        url: `${base}/user/add`,
-                    },
-                ],
+            },
+            {
+                title: "Secrets",
+                url: `${base}/secret`,
+                icon: KeyRoundIcon,
             },
             {
                 title: "Browse",
