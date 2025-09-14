@@ -25,7 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {Link} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 
 export function NavUser({
   user,
@@ -38,6 +38,8 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+const { organizationId } = useParams<{ organizationId: string }>()
+    const base = organizationId ? `/app/${organizationId}/user` : '/app/user';
 
   return (
     <SidebarMenu>
@@ -78,7 +80,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuGroup>
-                  <Link to={`/app/user/${user.id}`}>
+                  <Link to={`${base}/${user.id}`}>
               <DropdownMenuItem>
 
                     <BadgeCheck />

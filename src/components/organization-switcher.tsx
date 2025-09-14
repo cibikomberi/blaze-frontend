@@ -1,5 +1,5 @@
-import { ChevronsUpDown, Plus } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import {Building, ChevronsUpDown, Plus} from "lucide-react"
+import {Link, useNavigate} from "react-router-dom"
 
 import {
     DropdownMenu,
@@ -10,14 +10,8 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
-} from "@/components/ui/sidebar"
-import { Link } from "react-router-dom"
-import { useAppStore } from "@/store/useAppStore"
+import {SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,} from "@/components/ui/sidebar"
+import {useAppStore} from "@/store/useAppStore"
 
 export function OrganizationSwitcher() {
     const { isMobile } = useSidebar()
@@ -40,6 +34,8 @@ export function OrganizationSwitcher() {
                         >
                             <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                                 {/* org logo placeholder */}
+                                <Building className="size-4" />
+
                             </div>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">{activeOrganization.name}</span>
@@ -64,6 +60,8 @@ export function OrganizationSwitcher() {
                             >
                                 <div className="flex size-6 items-center justify-center rounded-md border">
                                     {/* org logo placeholder */}
+                                    <Building className="size-4" />
+
                                 </div>
                                 {organization.name}
                                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
